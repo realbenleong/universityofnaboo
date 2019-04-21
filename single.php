@@ -14,10 +14,12 @@
   </div>
   <div class="container container--narrow page-section">
     <div class="generic-content">
-        
+      <h3>Excerpt:</h3>
+      <?php the_excerpt(); ?>
+      <h3>Content:</h3>
+      <?php the_content(); ?>
     </div>
   </div>
-
 
         <?php echo the_permalink(); ?>
     <?php }

@@ -1,27 +1,23 @@
 <?php get_header(); ?>
-
-<div class="page-banner">
-    <div class="page-banner__bg-image" style="background-image: url(<?php echo get_theme_file_uri( "/images/ocean.jpg" ) ?>);"></div>
-    <div class="page-banner__content container container--narrow">
-      <div class="page-banner__intro">
-        <p><?php the_archive_title(); ?></p>
-        <p><?php the_archive_description(); ?></p>
-      </div>
-    </div>  
-  </div>
+<?php 
+pageBanner(array(
+  'title'=>'All programs'
+));
+?>
 <div class="container container--narrow page-section">
-  <?php
+    <?php
     while(have_posts()) {
       the_post(); ?>
-      <div class="post-item">
+    <div class="post-item">
 
-        <h2 class="headline headline--medium headline--post-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
+        <h2 class="headline headline--medium headline--post-title"><a
+                href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
 
-      </div>
-      
+    </div>
+
     <?php }
   ?>
-  <?php 
+    <?php 
     echo paginate_links();
   ?>
 </div>

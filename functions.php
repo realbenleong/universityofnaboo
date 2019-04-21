@@ -1,9 +1,25 @@
 <?php
+//Add new custom rest api field passed into json: http://localhost/wordpress/index.php/wp-json/wp/v2/posts
+function university_custom_rest() {
+    register_rest_field('post','authorName',array(
+        'get_callback'=>function() {
+            return get_the_author();
+        }
+    ));
+}
+
+add_action('rest_api_init','university_custom_rest');
+
 function uni_files() {
+    wp_enqueue_script('googleMap','//maps.googleapis.com/maps/api/js?key=AIzaSyBVmikQfhJtmBQOzKjMzl8yC6RiEcH7onc
+    ',NULL,'1.0',true);
     wp_enqueue_script('main-uni-js',get_theme_file_uri( '/js/scripts-bundled.js'), NULL,  microtime(), true );
     wp_enqueue_style('custom-google-fonts','//fonts.googleapis.com/css?family=Roboto+Condensed:300,300i,400,400i,700,700i|Roboto:100,300,400,400i,700,700i');
     wp_enqueue_style('font-awesome','//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
     wp_enqueue_style('uni_mainstyle',get_stylesheet_uri(), NULL, microtime());
+    wp_localize_script('main-uni-js','universityData',array(
+        'root_url'=>get_site_url()
+    ));
 }
 add_action('wp_enqueue_scripts','uni_files');
 
@@ -15,11 +31,15 @@ function university_features() {
     add_theme_support( 'post-thumbnails' );
     add_image_size('professorLandscape',400,260,true);
     add_image_size('professorPortrait',480,650,true);
+    add_image_size('pageBanner',1500,350,true);
 }
 
 add_action('after_setup_theme','university_features');
 
 function university_adjust_queries($x) {
+    if(!is_admin()&&is_post_type_archive('campus')&&$x->is_main_query()) {
+        $x->set('posts_per_page',-1);
+    }
     if(!is_admin()&&is_post_type_archive('program')&&$x->is_main_query()) {
         $x->set('orderby','title');
         $x->set('order','ASC');
@@ -42,3 +62,38 @@ function university_adjust_queries($x) {
 }
 
 add_action('pre_get_posts','university_adjust_queries');
+
+function universityMapKey($api) {
+    $api['key']='AIzaSyBVmikQfhJtmBQOzKjMzl8yC6RiEcH7onc';
+    return $api;
+}
+
+add_filter('acf/fields/google_map/api','universityMapKey');
+
+function pageBanner($x=NULL) {
+    if (!$x['title']) {
+        $x['title']=get_the_title();
+    }
+    if (!$x['subtitle']) {
+        $x['subtitle']=get_field('page_banner_subtitle');
+    }
+    if (!$x['photo']) {
+        if (get_field('page_banner_background_image')) {
+            $x['photo']=get_field('page_banner_background_image')['sizes']['pageBanner'];
+        } else {
+            $x['photo']=get_theme_file_uri('/images/ocean.jpg');
+        }
+    }
+    ?>
+      <div class="page-banner">
+    <div class="page-banner__bg-image" style="background-image: url(<?php echo $x['photo'] ?>);"></div>
+    <div class="page-banner__content container container--narrow">
+      <h1 class="page-banner__title"><?php echo $x['title'] ?></h1>
+      <div class="page-banner__intro">
+        <p><?php echo $x['subtitle']; ?></p>
+      </div>
+    </div>  
+  </div>
+<?php }
+
+?>
